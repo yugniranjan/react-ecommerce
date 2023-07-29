@@ -114,25 +114,35 @@ function classNames(...classes) {
 export default function ProductList() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [filter, setFilter] = useState({});
+  const [sort, setSort] = useState({});
   const products = useSelector(selectAllProducts);
   const dispatch = useDispatch();
 
   const handleFilter = (e, section, option) => {
-    // console.log(section.id, option.value);
-    const newFilter = { ...filter, [section.id]: option.value };
+    const newFilter = { ...filter };
+    if (e.target.checked) {
+      if (newFilter[section.id]) {
+        newFilter[section.id].push(option.value);
+      } else {
+        newFilter[section.id] = [option.value];
+      }
+    } else {
+      const index = newFilter[section.id].findIndex(
+        (el) => el === option.value
+      );
+      newFilter[section.id].splice(index, 1);
+    }
     setFilter(newFilter);
-    dispatch(fetchProdutsByFiltersAsync(newFilter));
   };
 
   const handleSort = (e, option) => {
-    const newFilter = { ...filter, _sort: option.sort, _order: option.order };
-    setFilter(newFilter);
-    dispatch(fetchProdutsByFiltersAsync(newFilter));
+    const sort = { _sort: option.sort, _order: option.order };
+    setSort(sort);
   };
 
   useEffect(() => {
-    dispatch(fetchAllProdutsAsync());
-  }, [dispatch]);
+    dispatch(fetchProdutsByFiltersAsync({ filter, sort }));
+  }, [dispatch, filter, sort]);
 
   return (
     <div>
@@ -421,11 +431,8 @@ function ProductGrid({ products }) {
         <div className="mx-auto max-w-2xl px-4 py-0 sm:px-6 sm:py-0 lg:max-w-7xl lg:px-8">
           <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
             {products.map((product) => (
-              <Link to="product-detail">
-                <div
-                  key={product.id}
-                  className="group relative border-solid border-2 border-gray-200 p-4 rounded-md"
-                >
+              <Link to="product-detail" key={product.id}>
+                <div className="group relative border-solid border-2 border-gray-200 p-4 rounded-md">
                   <div className=" aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-60">
                     <img
                       src={product.thumbnail}

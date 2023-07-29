@@ -8,9 +8,15 @@ export function fetchAllProduts() {
 }
 
 export function fetchProdutsByFilters(filter) {
+  // filter = {"category":["smartphone","laptop"]}
+  // sort = {_sort:"price",_order:"desc"}
   let queryString = "";
   for (let key in filter) {
-    queryString += `${key}=${filter[key]}&`;
+    const categoryValue = filter[key];
+    if (categoryValue.length > 0) {
+      const lastCategoryValue = categoryValue[categoryValue.length - 1];
+      queryString += `${key}=${lastCategoryValue}&`;
+    }
   }
 
   return new Promise(async (resolve) => {
